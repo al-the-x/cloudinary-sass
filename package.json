@@ -1,0 +1,29 @@
+{
+  "name": "cloudinary-sass",
+  "version": "0.1.0",
+  "description": "Sass functions and mixins to provide responsive images via Cloudinary",
+  "main": "index.scss",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "sass src/index.scss"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/al-the-x/cloudinary-sass.git"
+  },
+  "keywords": [
+    "sass",
+    "scss",
+    "responsive",
+    "images"
+  ],
+  "author": "David Rogers <hello@al-the-x.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/al-the-x/cloudinary-sass/issues"
+  },
+  "homepage": "https://github.com/al-the-x/cloudinary-sass#readme",
+  "devDependencies": {
+    "sass": "^1.27.0"
+  }
+}
