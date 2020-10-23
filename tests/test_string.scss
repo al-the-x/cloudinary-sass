@@ -1,0 +1,31 @@
+@use "../node_modules/sass-true/sass/true" as *;
+@use "../src/string";
+
+@include describe("string (extensions)"){
+  @include describe("str-join"){
+    @include describe("WHEN given ONLY `$parts`"){
+      @include it("should use `comma` as `$separator`"){
+        @include is-equal(
+          string.str-join(one two three),
+          "one, two, three"
+        );
+      }
+
+      @include it("should gracefully handle a MAP"){
+        @include is-equal(
+          string.str-join((one: 1, two: 2)),
+          "one 1, two 2"
+        );
+      }
+    }
+
+    @include describe("WHEN given `$separator` AND `$parts`"){
+      @include it("should use `$separator`"){
+        @include is-equal(
+          string.str-join(one two three, "/"),
+          "one/two/three"
+        );
+      }
+    }
+  }
+}

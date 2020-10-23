@@ -1,0 +1,10 @@
+// I have no idea why this doesn't already exist...
+@function str-join($parts, $separator: ", ") {
+  $joined: "";
+
+  @each $part in $parts {
+    $joined: "#{$joined}#{$separator}#{$part}";
+  }
+
+  @return str-slice($joined, str-length($separator) + 1);
+}

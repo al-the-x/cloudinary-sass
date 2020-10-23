@@ -1,0 +1,19 @@
+@function responsive-urls($urls-by-size){
+  $urls: ( );
+
+  @each $resolution, $url in $urls-by-size {
+    $urls: append($urls, (url($url) #{$resolution}), comma);
+  }
+
+  @return $urls;
+}
+
+
+@mixin responsive-background-image($urls-by-size, $prefix: true){
+  $urls: responsive-urls($urls-by-size);
+
+  background-image: if($prefix,
+    (-webkit-image-set($rules), image-set($rules)),
+    image-set($rules)
+  );
+}

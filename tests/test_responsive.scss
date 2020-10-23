@@ -1,0 +1,42 @@
+@use "../node_modules/sass-true/sass/true" as *;
+@use "../src/responsive";
+
+$inspect: true;
+
+@include describe("responsive"){
+  @include describe("responsive-urls"){
+    @include describe("WHEN given `$urls-by-size`"){
+      @include it("should produce a comma-separated list"){
+        @include is-equal(
+          responsive.responsive-urls($urls-by-size: (
+            1x: "path/to/1x-image.ext",
+          )),
+          (url("path/to/1x-image.ext") 1x,),
+          $inspect:true,
+        );
+
+        @include is-equal(
+          responsive.responsive-urls((
+            1x: "path/to/1x-image.ext",
+            2x: "path/to/2x-image.ext",
+          )),
+          (
+            url("path/to/1x-image.ext") 1x,
+            url("path/to/2x-image.ext") 2x
+          ),
+          $inspect:true,
+        );
+
+        @include is-equal(
+          responsive.responsive-urls((
+            400px: "path/to/400px-image.ext",
+          )),
+          (
+            url("path/to/400px-image.ext") 400px,
+          ),
+          $inspect:true,
+        );
+      }
+    }
+  }
+}

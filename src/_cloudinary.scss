@@ -1,0 +1,142 @@
+@use "./string" as string;
+@use "./responsive" as responsive;
+
+
+@function cloudinary-params($names...){
+  $PARAMETERS: (
+    width: w,
+    height: h,
+    crop: c,
+    aspect_ratio: ar,
+    gravity: g,
+    zoom: z,
+    x: x,
+    y: y,
+    // `format` is set via file extension
+    fetch_format: f,
+    quality: q,
+    radius: r,
+    angle: a,
+    effect: e,
+    opacity: o,
+    border: bo,
+    background: b,
+    overlay: l,
+    underlay: u,
+    default_image: d,
+    delay: dl,
+    color: co,
+    color_space: cs,
+    dpr: dpr,
+    page: pg,
+    density: dn,
+    flags: fl,
+    transformation: t,
+    "if": "if",
+    custom_function: fn,
+    variable: "$",
+  );
+
+  $kwargs: keywords($names);
+
+  // validate $kwargs, since we have to use variable $transformations
+  $invalid-kwargs: map-remove($kwargs, map-keys($PARAMETERS)...);
+  @if length($invalid-kwargs) > 0 {
+    @error "Invalid parameters: #{map-keys($invalid-kwargs)}";
+  }
+
+  $params: ( );
+
+  @each $kwarg, $value in $kwargs {
+    $params: map-merge($params, (map-get($PARAMETERS, $kwarg): $value));
+  }
+
+  @return $params;
+}
+
+
+@function cloudinary-transformations(
+  $transformations...
+){
+  $params: cloudinary-params($transformations...);
+
+  $segments: ( );
+
+  @each $param, $value in $params {
+    $param: map-get($CLOUDINARY_PARAM_MAP, $param);
+    @if $param and $value {
+      $segments: append($segments, "#{$param}_#{$value}");
+    }
+  }
+
+  // @debug "cloudinary-transformations:$segments", $segments;
+
+  @if length($segments) > 0 {
+    @return string.str-join($segments, comma);
+  }
+
+  @return null;
+}
+
+
+@function cloudinary-url(
+  $public-id,
+  $cloud-name: $CLOUDINARY_CLOUD_NAME,
+  $resource-type: image, // or `video`
+  $type: upload, // or `fetch`
+  $transformations...
+){
+  $segments: (
+    "https://res.cloudinary.com",
+    $cloud-name,
+    $resource-type,
+    $type,
+  );
+
+  $transformation-segment: cloudinary-transformations($transformations...);
+  @if $transformation-segment {
+    $segments: append($segments, $transformation-segment);
+  }
+
+  @return string.str-join(append($segments, $public-id), "/");
+}
+
+
+@function cloudinary-responsive-urls(
+  $public-id,
+  $cloudinary-params-by-resolution,
+  $transformations...
+){
+  $cloudinary-urls: ( );
+  @each $resolution, $cloudinary-params in $cloudinary-params-by-resolution {
+    @if not map-has-key($cloudinary-params, public-id) {
+      $cloudinary-params: map-merge($cloudinary-params, (public-id: $public-id));
+    }
+
+    $cloudinary-urls: map-merge($cloudinary-urls, (
+      $resolution: cloudinary-url(
+        map-merge(keywords($transformations), $cloudinary-params)...
+        // use `$transformations` as defaults overridden by `$cloudinary-params`
+      )
+    ));
+  }
+
+  @return $cloudinary-urls;
+}
+
+
+@mixin cloudinary-responsive-background-image(
+  $public-id,
+  $cloudinary-params-by-resolution,
+  $prefixed: false,
+  $transformations...
+){
+  @include responsive.responsive-background-image(
+    $prefix: $prefix,
+    $urls-by-size: cloudinary-responsive-urls(
+      $public-id,
+      $cloudinary-params-by-resolution,
+      $transformations...
+    ),
+  );
+}

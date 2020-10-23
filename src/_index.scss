@@ -1,0 +1,18 @@
+// Using `demo` in production is not recommended...
+$CLOUDINARY_CLOUD_NAME: "demo" !default;
+
+
+// Default sizes should be slightly larger than device widths. The browser can
+// downsize images efficiently but not upsize them.
+$RESPONSIVE_IMAGE_SIZES: (
+  1x: (width: 420), // wider than iPhone portrait width
+  2x: (width: 760), // wider then iPhone landscape, iPad portrait
+  3x: (width: 1070), // wider than iPad landscape, Desktop medium DPI
+  4x: (width: 1460), // wider than Desktop HiDPI
+  5x: (width: 2560), // closer than Desktop 4K
+) !default;
+
+
+@forward "./string";
+@forward "./responsive";
+@forward "./cloudinary";
