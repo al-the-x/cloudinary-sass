@@ -66,7 +66,6 @@ $CLOUDINARY_CLOUD_NAME: "demo" !default;
   $segments: ( );
 
   @each $param, $value in $params {
-    $param: map-get($CLOUDINARY_PARAM_MAP, $param);
     @if $param and $value {
       $segments: append($segments, "#{$param}_#{$value}");
     }
@@ -105,22 +104,23 @@ $CLOUDINARY_CLOUD_NAME: "demo" !default;
 }
 
 
+// @return map($resolution: cloudinary-url, ...) for each $cloudinary-params-by-resolution
 @function cloudinary-responsive-urls(
   $public-id,
-  $cloudinary-params-by-resolution,
+  $cloudinary-params-by-resolution, // ($resolution: string, $cloudinary-params: ($name: $value, ...))
   $transformations...
 ){
   $cloudinary-urls: ( );
   @each $resolution, $cloudinary-params in $cloudinary-params-by-resolution {
     @if not map-has-key($cloudinary-params, public-id) {
+      // `$public-id` can be overridden for a specific `$resolution`
       $cloudinary-params: map-merge($cloudinary-params, (public-id: $public-id));
     }
 
+    $params: map-merge(keywords($transformations), $cloudinary-params);
+
     $cloudinary-urls: map-merge($cloudinary-urls, (
-      $resolution: cloudinary-url(
-        map-merge(keywords($transformations), $cloudinary-params)...
-        // use `$transformations` as defaults overridden by `$cloudinary-params`
-      )
+      $resolution: cloudinary-url($params...)
     ));
   }
 

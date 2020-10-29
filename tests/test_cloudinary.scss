@@ -1,0 +1,188 @@
+@use "true" as *;
+@use "../src/cloudinary";
+
+@include describe("cloudinary"){
+  @include describe("@function cloudinary-responsive-urls"){
+    @include describe("GIVEN a single resolution"){
+      @include describe("AND no transformations"){
+        @include it("should produce the base Cloudinary URL"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (1x: ()),
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/upload/example.png",
+            ),
+          );
+        }
+      }
+
+      @include describe("AND some transformations"){
+        @include it("WHEN given ONE transformation"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (1x: (width: 400)),
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/upload/w_400/example.png",
+            )
+          );
+        }
+
+        @include it("WHEN given TWO transformations"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (1x: (width: 400, opacity: 0.2)),
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/upload/w_400,o_0.2/example.png",
+            )
+          );
+        }
+
+        @include it("WHEN given `fetch` plus transformations"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (1x: (type: fetch, width: 400, opacity: 0.2)),
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/fetch/w_400,o_0.2/example.png",
+            )
+          );
+        }
+      }
+
+      @include describe("AND some _global_ transformations"){
+        @include it("should include the global transformations into the URL"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (1x: (width: 400, opacity: 0.2)),
+              $type: fetch,
+              $crop: fill,
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/fetch/c_fill,w_400,o_0.2/example.png",
+            )
+          );
+        }
+
+        @include it("should override the globals with the resolution-specific params"){
+          @include is-equal(
+            cloudinary.cloudinary-responsive-urls(
+              "example.png",
+              (
+                1x: (crop: crop, width: 400, gravity: faces),
+                2x: (width: 720)
+              ),
+              $type: fetch,
+              $crop: fill,
+            ),
+            (
+              1x: "https://res.cloudinary.com/demo/image/fetch/c_crop,w_400,g_faces/example.png",
+              2x: "https://res.cloudinary.com/demo/image/fetch/c_fill,w_720/example.png",
+            ),
+          );
+        }
+      }
+    }
+  } // @describe(@function cloudinary-responsive-urls)
+
+  @include describe("@mixin cloudinary-responsive-background-image"){
+    @include describe("WHEN given a single resolution with no transformations"){
+      @include it("should return the base Cloudinary URL inside an `image-set`"){
+        @include assert {
+          @include output {
+            @include cloudinary.cloudinary-responsive-background-image(
+              "example.png", (1x: ()),
+            );
+          }
+
+          @include expect {
+            background-image: image-set(
+              url("https://res.cloudinary.com/demo/image/upload/example.png") 1x,
+            );
+          }
+        } // END assert
+      } // END it
+    } // END describe
+
+    /**
+     * This is more of a real-world example of the utility:
+     * - Use image locations stored outside of Cloudinary, i.e. wherever editors upload them.
+     * - Use a Tablet Landscape image for most screen resolutions, downsized for max resolution by device
+     * - Instruct Cloudinary to fetch and transform from the remote location with `$type: fetch`
+     * - Instruct Cloudinary to use `$gravity: faces` to crop by face detection on Mobile Portrait (1x)
+     * - Instruct Cloudinary to use a different remote image on HiDPI Desktop (4x) and 4K Desktop (5x)
+     *
+     * The use of `1x` through `5x` correspond to the `dppx` or "dots per pixel" unit specified for
+     * the [CSS: `<resolution>` data type](https://developer.mozilla.org/en-US/docs/Web/CSS/resolution)
+     * but any valid `<resolution>` unit can be used.
+     *
+     * @see [CSS: `image-set` Syntax](https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Syntax)
+     */
+    @include describe("WHEN given a multiple resolution with multiple transformations"){
+      @include it("should apply the transformations to the image AND use the extra transformations"){
+        @include assert {
+          @include output {
+            @include cloudinary.cloudinary-responsive-background-image(
+              "https://example.com/path/to/example.png",
+              // Say this file is sized at 1024 with pictures of people...
+              (
+                1x: (width: 420, gravity: faces),
+                2x: (width: 780),
+                3x: (width: 1100),
+                // Use this larger image for 4x and 5x, but there's an easier way...
+                4x: (width: 1400, public-id: "https://example.com/path/to/example-4x+.png"),
+                5x: (width: 2500, public-id: "https://example.com/path/to/example-4x+.png"),
+              ),
+              $type: fetch,
+            );
+          }
+
+          @include expect {
+            background-image: image-set(
+              url("https://res.cloudinary.com/demo/image/fetch/w_420,g_faces/https://example.com/path/to/example.png") 1x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_780/https://example.com/path/to/example.png") 2x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_1100/https://example.com/path/to/example.png") 3x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_1400/https://example.com/path/to/example-4x+.png") 4x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_2500/https://example.com/path/to/example-4x+.png") 5x,
+            );
+          }
+        }
+
+        @include assert {
+          @include output {
+            @include cloudinary.cloudinary-responsive-background-image(
+              "https://example.com/path/to/example.png",
+              // Say this file is sized at 1024 with pictures of people...
+              (
+                1x: (width: 420, gravity: faces),
+                2x: (width: 780),
+                3x: (width: 1100),
+                // Use this larger image for 4x and 5x...
+                4x: (width: 1400, public-id: "https://example.com/path/to/example-4x+.png"),
+                5x: (width: 2500, public-id: "https://example.com/path/to/example-4x+.png"),
+              ),
+              $type: fetch,
+            );
+          }
+
+          @include expect {
+            background-image: image-set(
+              url("https://res.cloudinary.com/demo/image/fetch/w_420,g_faces/https://example.com/path/to/example.png") 1x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_780/https://example.com/path/to/example.png") 2x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_1100/https://example.com/path/to/example.png") 3x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_1400/https://example.com/path/to/example-4x+.png") 4x,
+              url("https://res.cloudinary.com/demo/image/fetch/w_2500/https://example.com/path/to/example-4x+.png") 5x,
+            );
+          }
+        }
+      }
+    } // END @describe(multiple resolution, multiple transformations)
+  } // @describe(@mixin cloudinary-responsive-background-image)
+} // @describe(cloudinary)
