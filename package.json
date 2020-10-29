@@ -5,7 +5,7 @@
   "main": "src/__main.scss",
   "scripts": {
     "build": "sass src/__main.scss",
-    "test": "sass tests/test__main.scss"
+    "test": "mocha tests/test__main.cjs"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/al-the-x/cloudinary-sass#readme",
   "devDependencies": {
+    "mocha": "^8.2.0",
     "sass": "^1.27.0",
     "sass-true": "^6.0.1"
   }
