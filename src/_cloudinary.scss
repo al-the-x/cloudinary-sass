@@ -110,14 +110,14 @@ $CLOUDINARY_CLOUD_NAME: "demo" !default;
   $cloudinary-params-by-resolution, // ($resolution: string, $cloudinary-params: ($name: $value, ...))
   $transformations...
 ){
-  $cloudinary-urls: ( );
-  @each $resolution, $cloudinary-params in $cloudinary-params-by-resolution {
-    @if not map-has-key($cloudinary-params, public-id) {
-      // `$public-id` can be overridden for a specific `$resolution`
-      $cloudinary-params: map-merge($cloudinary-params, (public-id: $public-id));
-    }
+  $default-params: keywords($transformations);
 
-    $params: map-merge(keywords($transformations), $cloudinary-params);
+  $cloudinary-urls: ( );
+  @each $resolution, $resolution-params in $cloudinary-params-by-resolution {
+    $cloudinary-params: map-merge($default-params, map-merge(
+      (public-id: $public-id),
+      $resolution-params,
+    ));
 
     $cloudinary-urls: map-merge($cloudinary-urls, (
       $resolution: cloudinary-url($params...)
