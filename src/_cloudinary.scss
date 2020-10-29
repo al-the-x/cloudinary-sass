@@ -120,7 +120,20 @@ $CLOUDINARY_CLOUD_NAME: "demo" !default;
     ));
 
     $cloudinary-urls: map-merge($cloudinary-urls, (
-      $resolution: cloudinary-url($params...)
+      $resolution: cloudinary-url(
+        // Passing anything less than ALL the args with a splatted `map` causes
+        // `libsass` to try mapping the splat to named args, causing an error,
+        // even if the splat has keys that map to the arg names. Known bug:
+        //
+        // $cloudinary-params... // FIXME: after https://github.com/sass/libsass/issues/2818
+        map-get($cloudinary-params, public-id) or $public-id,
+        map-get($cloudinary-params, cloud-name) or $CLOUDINARY_CLOUD_NAME,
+        map-get($cloudinary-params, resource-type) or image,
+        map-get($cloudinary-params, type) or upload,
+        map-remove($cloudinary-params,
+          "public-id", "cloud-name", "resource-type", "type"
+        )...
+      )
     ));
   }
 
