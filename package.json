@@ -1,6 +1,6 @@
 {
   "name": "cloudinary-sass",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sass functions and mixins to provide responsive images via Cloudinary",
   "main": "src/__main.scss",
   "scripts": {
