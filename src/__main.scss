@@ -13,6 +13,11 @@ $RESPONSIVE_IMAGE_SIZES: (
 ) !default;
 
 
-@forward "./string";
-@forward "./responsive";
-@forward "./cloudinary";
+// Only usable by `npm sass` / `dart-sass` ATM
+@forward "string";
+@forward "responsive";
+@forward "cloudinary";
+
+@import "string";
+@import "responsive";
+@import "cloudinary";

@@ -1,5 +1,5 @@
 @use "true" as *;
-@use "../src/responsive";
+@use "../src/responsive" with ($RESPONSIVE_IMAGE_SET_PREFIXED: false);
 
 $inspect: true;
 

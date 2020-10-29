@@ -1,5 +1,8 @@
-@use "./string" as string;
-@use "./responsive" as responsive;
+// FIXME: Don't pollute the main namespace once `libsass  / `sass-loader` recognize `@use`
+@use "./string" as *;
+@use "./responsive" as *;
+
+$CLOUDINARY_CLOUD_NAME: "demo" !default;
 
 
 @function cloudinary-params($names...){
@@ -72,7 +75,7 @@
   // @debug "cloudinary-transformations:$segments", $segments;
 
   @if length($segments) > 0 {
-    @return string.str-join($segments, comma);
+    @return str-join($segments, ",");
   }
 
   @return null;
@@ -98,7 +101,7 @@
     $segments: append($segments, $transformation-segment);
   }
 
-  @return string.str-join(append($segments, $public-id), "/");
+  @return str-join(append($segments, $public-id), "/");
 }
 
 
@@ -128,12 +131,12 @@
 @mixin cloudinary-responsive-background-image(
   $public-id,
   $cloudinary-params-by-resolution,
-  $prefixed: false,
+  $prefixed: $RESPONSIVE_IMAGE_SET_PREFIXED,
   $transformations...
 ){
-  @include responsive.responsive-background-image(
-    $prefix: $prefix,
-    $urls-by-size: cloudinary-responsive-urls(
+  @include responsive-background-image(
+    $prefixed: $prefixed,
+    $urls-by-resolution: cloudinary-responsive-urls(
       $public-id,
       $cloudinary-params-by-resolution,
       $transformations...

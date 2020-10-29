@@ -1,3 +1,5 @@
+$RESPONSIVE_IMAGE_SET_PREFIXED: true !default;
+
 @function responsive-urls($urls-by-size){
   $urls: ( );
 
@@ -9,11 +11,18 @@
 }
 
 
-@mixin responsive-background-image($urls-by-size, $prefix: true){
-  $urls: responsive-urls($urls-by-size);
+// @param $urls-by-resolution (list[map[resolution:url]]|map[resolution|url])
+//    and `list[map]` will be translated into a list of `background-image` values
+// @param $prefixed (bool) defaults to `$RESPONSIVE_IMAGE_SET_PREFIXED` because CSS
+//    `image-set` is not supported but you might be using `autoprefixer` and
+//    want to disable the prefix
+//
+// @see https://developer.mozilla.org/en-US/docs/Web/CSS/image-set#Browser_compatibility
+@mixin responsive-background-image($urls-by-resolution, $prefixed: $RESPONSIVE_IMAGE_SET_PREFIXED){
+  $urls: responsive-urls($urls-by-resolution);
 
-  background-image: if($prefix,
-    (-webkit-image-set($rules), image-set($rules)),
-    image-set($rules)
+  background-image: if($prefixed,
+    (-webkit-image-set($urls), image-set($urls)),
+    image-set($urls)
   );
 }
