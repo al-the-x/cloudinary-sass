@@ -2,10 +2,10 @@
   "name": "cloudinary-sass",
   "version": "0.1.0",
   "description": "Sass functions and mixins to provide responsive images via Cloudinary",
-  "main": "src/index.scss",
+  "main": "src/__main.scss",
   "scripts": {
-    "build": "sass src/index.scss",
-    "test": "sass tests/index.scss"
+    "build": "sass src/__main.scss",
+    "test": "sass tests/test__main.scss"
   },
   "repository": {
     "type": "git",
